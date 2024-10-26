@@ -2,13 +2,12 @@ package com.example.geektrust.Services;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import com.example.geektrust.Configs.TrainConfiguration;
 import com.example.geektrust.Entities.Bogie;
-import com.example.geektrust.Entities.BogieType;
+import com.example.geektrust.Entities.BogieComparator;
+import com.example.geektrust.Entities.BogieFactory;
 import com.example.geektrust.Entities.Train;
 
 public class TrainService {
@@ -75,11 +74,7 @@ public class TrainService {
     private void attachBogies(Train T, List<String> train) {
         for (int i = 0; i < train.size(); i++) {
             String bogieName = train.get(i);
-            BogieType bogieType = BogieType.PASSENGER_CLASS; 
-            if (!TrainConfiguration.getStationName(bogieName).isPresent()) {
-                bogieType = BogieType.ENGINE;
-            }
-            Bogie bogie = new Bogie(bogieName, bogieType);
+            Bogie bogie = BogieFactory.getBogie(bogieName);
             T.addBogie(bogie);
         }
     }
@@ -112,18 +107,13 @@ public class TrainService {
         bogies.addAll(B.getBogies());
         // remove the arrived station(source) from the merged list, as travellers have gotten down here
         bogies.removeIf(e -> e.getName().equals(source));
-        sortBogies(bogies, source);
+        Collections.sort(bogies, new BogieComparator(source));
         // add sorted bogies to AB which has engines
         AB.getBogies().addAll(bogies);
         // clear A and B train bogies
         A.clearBogies();
         B.clearBogies();
         return AB;
-    }
-
-    private void sortBogies(List<Bogie> bogies, String source) {
-        Collections.sort(bogies, Comparator.comparing(bogie -> 
-        TrainConfiguration.getStationDistanceFromGivenSource(bogie.getName(), source), Comparator.reverseOrder()));
     }
 
     private void addEnginesToMergedTrain(Train A, Train B, Train AB) {
