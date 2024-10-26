@@ -13,13 +13,13 @@ import org.junit.jupiter.api.Test;
 import com.example.geektrust.Services.TrainService;
 
 public class MainTest {
-    private TrainService trainService;
+    private Main main;
     ByteArrayOutputStream outputStream;
     PrintStream originalOut;
 
     @BeforeEach
     void setup(){
-        trainService = new TrainService();
+        main = new Main("HYB", "BPL");
         outputStream = new ByteArrayOutputStream();
         originalOut = System.out;
         System.setOut(new PrintStream(outputStream));
@@ -31,12 +31,12 @@ public class MainTest {
         //Arrange
         String trainA = "TRAIN_A ENGINE KRN SLM BLR BLR HYB NGP ITJ BPL BPL NDL NDL";
         String trainB = "TRAIN_B ENGINE NJP GHY PNE MAQ NGP NGP BPL PTA";
-        String expectedArrivalOfTrainA = "ARRIVAL  TRAIN_A ENGINE NGP ITJ BPL BPL NDL NDL";
+        String expectedArrivalOfTrainA = "ARRIVAL  TRAIN_A ENGINE HYB NGP ITJ BPL BPL NDL NDL";
         String expectedArrivalOfTrainB = "ARRIVAL  TRAIN_B ENGINE NJP GHY NGP NGP BPL PTA";
         String expectedDepartureofTrainAB = "DEPARTURE  TRAIN_AB ENGINE ENGINE GHY NJP PTA NDL NDL BPL BPL BPL ITJ NGP NGP NGP";
 
         //Act
-        testFunctionality(trainA.split(" "), trainB.split(" "), expectedArrivalOfTrainA,
+        testFunctionality(trainA, trainB, expectedArrivalOfTrainA,
         expectedArrivalOfTrainB, expectedDepartureofTrainAB);
     }
 
@@ -51,7 +51,7 @@ public class MainTest {
         String expectedDepartureofTrainAB = "DEPARTURE  TRAIN_AB ENGINE ENGINE GHY GHY NJP NJP PTA NDL NDL AGA BPL NGP";
         
         //Act
-        testFunctionality(trainA.split(" "), trainB.split(" "), expectedArrivalOfTrainA,
+        testFunctionality(trainA, trainB, expectedArrivalOfTrainA,
         expectedArrivalOfTrainB, expectedDepartureofTrainAB);
     }
 
@@ -61,12 +61,12 @@ public class MainTest {
         //Arrange
         String trainA = "TRAIN_A ENGINE KRN KRN SLM BLR BLR HYB";
         String trainB = "TRAIN_B ENGINE NJP GHY PNE MAQ NGP BPL PTA";
-        String expectedArrivalOfTrainA = "ARRIVAL  TRAIN_A ENGINE";
+        String expectedArrivalOfTrainA = "ARRIVAL  TRAIN_A ENGINE HYB";
         String expectedArrivalOfTrainB = "ARRIVAL  TRAIN_B ENGINE NJP GHY NGP BPL PTA";
         String expectedDepartureofTrainAB = "DEPARTURE  TRAIN_AB ENGINE ENGINE GHY NJP PTA BPL NGP";
 
         //Act
-        testFunctionality(trainA.split(" "), trainB.split(" "), expectedArrivalOfTrainA,
+        testFunctionality(trainA, trainB, expectedArrivalOfTrainA,
         expectedArrivalOfTrainB, expectedDepartureofTrainAB);
     }
 
@@ -81,22 +81,22 @@ public class MainTest {
         String expectedDepartureofTrainAB = "DEPARTURE  TRAIN_AB ENGINE ENGINE NDL NDL AGA BPL ITJ NGP";
         
         //Act
-        testFunctionality(trainA.split(" "), trainB.split(" "), expectedArrivalOfTrainA,
+        testFunctionality(trainA, trainB, expectedArrivalOfTrainA,
         expectedArrivalOfTrainB, expectedDepartureofTrainAB);
     }
 
     @Test
-    @DisplayName("Train B travels till end, but has bogies of train A, train A doesn't travell till Hyd")
+    @DisplayName("Train B travels till end, but has bogies of train A, train A doesn't travel till Hyd")
     void testTrainBCrossFullRun(){
         //Arrange
         String trainA = "TRAIN_A ENGINE KRN KRN SLM BLR BLR HYB";
         String trainB = "TRAIN_B ENGINE NJP GHY PNE SRR MAQ MAO NGP BPL PTA AGA NDL NDL";
-        String expectedArrivalOfTrainA = "ARRIVAL  TRAIN_A ENGINE";
+        String expectedArrivalOfTrainA = "ARRIVAL  TRAIN_A ENGINE HYB";
         String expectedArrivalOfTrainB = "ARRIVAL  TRAIN_B ENGINE NJP GHY NGP BPL PTA AGA NDL NDL";
         String expectedDepartureofTrainAB = "DEPARTURE  TRAIN_AB ENGINE ENGINE GHY NJP PTA NDL NDL AGA BPL NGP";
 
         //Act
-        testFunctionality(trainA.split(" "), trainB.split(" "), expectedArrivalOfTrainA,
+        testFunctionality(trainA, trainB, expectedArrivalOfTrainA,
         expectedArrivalOfTrainB, expectedDepartureofTrainAB);
     }
 
@@ -111,7 +111,7 @@ public class MainTest {
         String expectedDepartureofTrainAB = "DEPARTURE  TRAIN_AB ENGINE ENGINE GHY NJP NDL NDL AGA BPL NGP";
         
         //Act
-        testFunctionality(trainA.split(" "), trainB.split(" "), expectedArrivalOfTrainA,
+        testFunctionality(trainA, trainB, expectedArrivalOfTrainA,
         expectedArrivalOfTrainB, expectedDepartureofTrainAB);
     }
 
@@ -126,20 +126,15 @@ public class MainTest {
         String expectedDepartureofTrainAB = "JOURNEY_ENDED";
         
         //Act
-        testFunctionality(trainA.split(" "), trainB.split(" "), expectedArrivalOfTrainA,
+        testFunctionality(trainA, trainB, expectedArrivalOfTrainA,
         expectedArrivalOfTrainB, expectedDepartureofTrainAB);
     }
 
-    private void testFunctionality(String[] trainA, String[] trainB, String expectedArrivalOfTrainA,
+    private void testFunctionality(String trainA, String trainB, String expectedArrivalOfTrainA,
             String expectedArrivalOfTrainB, String expectedDepartureofTrainAB) {
                 try {
                     // Act
-                    trainService.run(
-                        new ArrayList<>(Arrays.asList(trainA)),
-                        new ArrayList<>(Arrays.asList(trainB)),
-                        "HYB",
-                        "BPL"
-                    );
+                    main.run(trainA, trainB);
                     
                     // Assert
                     String[] actualOutput = outputStream.toString().trim().split("\n");

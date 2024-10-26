@@ -8,12 +8,16 @@ import java.util.Optional;
 
 public class Train {
     private String name;
+    // engine + bogies
+    private final int minValidBogieCount;
+
     private List<Bogie> bogies;
     private HashMap<String, Integer> bogieDistanceFromSource;
 
-    public Train(String name) {
+    public Train(String name, int minBogieCount) {
         setName(name);
         this.bogies = new ArrayList<>();
+        this.minValidBogieCount = minBogieCount;
         bogieDistanceFromSource = TrainConfiguration.getStationDistances(name);
     }
 
@@ -34,6 +38,10 @@ public class Train {
 
     public String getName() {
         return name;
+    }
+
+    public int getMinValidBogieCount() {
+        return minValidBogieCount;
     }
 
     public void clearBogies() {

@@ -10,36 +10,38 @@ import com.example.geektrust.Services.TrainService;
 
 public class Main {
 
-    String combinedSourceStation = "HYB";
-    String combinedDestinationStation = "BPL";
-    TrainService trainService = new TrainService();
+    private String combinedSourceStation;
+    private String combinedDestinationStation;
+    private TrainService trainService;
+
+    Main(String combinedSourceStation, String combinedDestinationStation) {
+        this.combinedDestinationStation = combinedDestinationStation;
+        this.combinedSourceStation = combinedSourceStation;
+        this.trainService = new TrainService();
+    }
+    
     public static void main(String[] args)  {
         if (args.length != 1){
             throw new RuntimeException("Input file not given");
         }
-        new Main().run(args[0]);
-	}
-
-    void run(String inputFile) {
         try {
             // the file to be opened for reading
-            FileInputStream fis = new FileInputStream(inputFile);
+            FileInputStream fis = new FileInputStream(args[0]);
             Scanner sc = new Scanner(fis); // file to be scanned
-            String[] trainA = sc.nextLine().split(" ");
-            // for (int i = 0; i < trainA.length; i++) {
-            //     System.out.println(trainA[i]);
-            // }
-            String[] trainB = sc.nextLine().split(" ");
-            // for (int i = 0; i < trainB.length; i++) {
-            //     System.out.println(trainB[i]);
-            // }
-            trainService.run(new ArrayList<>(Arrays.asList(trainA)), new ArrayList<>(Arrays.asList(trainB)), 
-            combinedSourceStation, combinedDestinationStation);
+            String trainA = sc.nextLine();
+            String trainB = sc.nextLine();
+            new Main("HYB", "BPL").run(trainA, trainB);
             sc.close(); // closes the scanner
-            
         } 
         catch (IOException e) {
             System.out.println("Error: " + e);
         }
+        // new Main().run(args[0]);
+	}
+
+    void run(String trainA, String trainB) {
+        trainService.run(new ArrayList<>(Arrays.asList(trainA.split(" "))), 
+        new ArrayList<>(Arrays.asList(trainB.split(" "))), 
+        combinedSourceStation, combinedDestinationStation);
     }
 }

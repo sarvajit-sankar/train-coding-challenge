@@ -11,12 +11,11 @@ import com.example.geektrust.Entities.Bogie;
 import com.example.geektrust.Entities.Train;
 
 public class TrainService {
-
     public void run(List<String> trainA, List<String> trainB, String combinedSourceStation, 
     String combinedDestinationStation) {
-        Train A = new Train(trainA.get(0));
+        Train A = new Train(trainA.get(0), 2);
         trainA.remove(0);
-        Train B = new Train(trainB.get(0));
+        Train B = new Train(trainB.get(0), 2);
         trainB.remove(0);
         // attach bogies before the train begins travelling
         attachBogies(A, trainA);
@@ -27,16 +26,21 @@ public class TrainService {
         travel(B, combinedSourceStation);
         printTrain(B, "ARRIVAL");
         // merge at combinedSourceStation
-        Train AB = merge(A, B, combinedSourceStation);
-        printTrain(AB, "DEPARTURE");
 
-        // travel from combinedSourceStation till combinedDestinationStation
-        travel(AB, combinedDestinationStation);
-        // printTrain(AB, "ARRIVAL");
-        // split at combinedDestinationStation
-        split(A, B, AB);
-        // printTrain(A, "DEPARTURE");
-        // printTrain(B, "DEPARTURE");
+        Train AB = merge(A, B, combinedSourceStation);
+        if (AB.getBogies().size() < AB.getMinValidBogieCount()) {
+            System.out.println("JOURNEY_ENDED");
+        }
+        else {
+            printTrain(AB, "DEPARTURE");
+            // travel from combinedSourceStation till combinedDestinationStation
+            travel(AB, combinedDestinationStation);
+            // printTrain(AB, "ARRIVAL");
+            // split at combinedDestinationStation
+            split(A, B, AB, combinedDestinationStation);
+            // printTrain(A, "DEPARTURE");
+            // printTrain(B, "DEPARTURE");
+        }
     }
 
     private void removeEnginesFromAB(Train A, Train B, Train AB) {
@@ -46,9 +50,11 @@ public class TrainService {
         AB.getBogies().remove(0);
     }
 
-    private void split(Train A, Train B, Train AB) {
+    private void split(Train A, Train B, Train AB, String source) {
         removeEnginesFromAB(A, B, AB);
         List<Bogie> bogiesAB = AB.getBogies();
+        // remove the arrived station(source) from the merged list, as travellers have gotten down here
+        bogiesAB.removeIf(e -> e.getName().equals(source));
         for (int i = 0; i < bogiesAB.size(); i++) {
             Bogie bogie = bogiesAB.get(i);
             if (A.getBogieDistanceFromSource(bogie.getName()).isPresent()) {
@@ -61,11 +67,7 @@ public class TrainService {
     }
 
     private void printTrain(Train train, String state) {
-        List<Bogie> bogies = train.getBogies();
         // if the combined train is empty i.e both the trains are empty
-        if (bogies.size() == 2 && bogies.get(1).getName().equals("ENGINE")) {
-            System.out.println("JOURNEY_ENDED");
-        }
         System.out.println(state + "  " + train.toString());
     }
 
@@ -88,7 +90,7 @@ public class TrainService {
             }
             // train may have bogies which aren't part of its route, which will get merged at destination
             if (train.getBogieDistanceFromSource(bogie.getName()).isPresent()) {
-                if (train.getBogieDistanceFromSource(bogie.getName()).get() <= destinationDistance) {
+                if (train.getBogieDistanceFromSource(bogie.getName()).get() < destinationDistance) {
                     iterator.remove();
                 }   
             }
@@ -96,12 +98,14 @@ public class TrainService {
     }
 
     private Train merge(Train A, Train B, String source) {
-        Train AB = new Train("TRAIN_AB");
+        Train AB = new Train("TRAIN_AB", 3);
         addEnginesToAB(A, B, AB);
 
         List<Bogie> bogies = new ArrayList<>();
         bogies.addAll(A.getBogies());
         bogies.addAll(B.getBogies());
+        // remove the arrived station(source) from the merged list, as travellers have gotten down here
+        bogies.removeIf(e -> e.getName().equals(source));
         sortBogies(bogies, source);
         // add sorted bogies to AB which has engines
         AB.getBogies().addAll(bogies);
