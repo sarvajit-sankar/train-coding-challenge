@@ -8,6 +8,7 @@ import java.util.List;
 
 import com.example.geektrust.Configs.TrainConfiguration;
 import com.example.geektrust.Entities.Bogie;
+import com.example.geektrust.Entities.BogieType;
 import com.example.geektrust.Entities.Train;
 
 public class TrainService {
@@ -43,7 +44,7 @@ public class TrainService {
         }
     }
 
-    private void removeEnginesFromAB(Train A, Train B, Train AB) {
+    private void removeEnginesFromMergedTrain(Train A, Train B, Train AB) {
         A.addBogie(AB.getBogies().get(0));
         AB.getBogies().remove(0);
         B.addBogie(AB.getBogies().get(0));
@@ -51,7 +52,7 @@ public class TrainService {
     }
 
     private void split(Train A, Train B, Train AB, String source) {
-        removeEnginesFromAB(A, B, AB);
+        removeEnginesFromMergedTrain(A, B, AB);
         List<Bogie> bogiesAB = AB.getBogies();
         // remove the arrived station(source) from the merged list, as travellers have gotten down here
         bogiesAB.removeIf(e -> e.getName().equals(source));
@@ -73,7 +74,12 @@ public class TrainService {
 
     private void attachBogies(Train T, List<String> train) {
         for (int i = 0; i < train.size(); i++) {
-            Bogie bogie = new Bogie(train.get(i));
+            String bogieName = train.get(i);
+            BogieType bogieType = BogieType.PASSENGER_CLASS; 
+            if (!TrainConfiguration.getStationName(bogieName).isPresent()) {
+                bogieType = BogieType.ENGINE;
+            }
+            Bogie bogie = new Bogie(bogieName, bogieType);
             T.addBogie(bogie);
         }
     }
@@ -85,7 +91,7 @@ public class TrainService {
         while (iterator.hasNext()) {
             Bogie bogie = iterator.next();
             // engines are to be ignored
-            if (bogie.getName().equals("ENGINE")) {
+            if (bogie.isEngine()) {
                 continue;
             }
             // train may have bogies which aren't part of its route, which will get merged at destination
@@ -99,7 +105,7 @@ public class TrainService {
 
     private Train merge(Train A, Train B, String source) {
         Train AB = new Train("TRAIN_AB", 3);
-        addEnginesToAB(A, B, AB);
+        addEnginesToMergedTrain(A, B, AB);
 
         List<Bogie> bogies = new ArrayList<>();
         bogies.addAll(A.getBogies());
@@ -120,7 +126,7 @@ public class TrainService {
         TrainConfiguration.getStationDistanceFromGivenSource(bogie.getName(), source), Comparator.reverseOrder()));
     }
 
-    private void addEnginesToAB(Train A, Train B, Train AB) {
+    private void addEnginesToMergedTrain(Train A, Train B, Train AB) {
         List<Bogie> bogiesA = A.getBogies();
         AB.addBogie(bogiesA.get(0));
         bogiesA.remove(0);

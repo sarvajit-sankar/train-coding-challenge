@@ -26,9 +26,9 @@ public class Train {
     }
 
     private void setName(String name) {
-        if (name.isEmpty() || name == null) {
-            throw new RuntimeException("Train name is either null or Empty");
-        }
+        // if (name.isEmpty() || name == null) {
+        //     throw new RuntimeException("Train name is either null or Empty");
+        // }
         this.name = name;
     }
 
