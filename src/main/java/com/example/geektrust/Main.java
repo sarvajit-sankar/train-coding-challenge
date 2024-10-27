@@ -6,24 +6,25 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
 
+import com.example.geektrust.Services.JourneyService;
 import com.example.geektrust.Services.TrainService;
 
 public class Main {
 
     private String combinedSourceStation;
     private String combinedDestinationStation;
-    private TrainService trainService;
+    private JourneyService journeyService;
 
     Main(String combinedSourceStation, String combinedDestinationStation) {
         this.combinedDestinationStation = combinedDestinationStation;
         this.combinedSourceStation = combinedSourceStation;
-        this.trainService = new TrainService();
+        this.journeyService = new JourneyService(new TrainService());
     }
-    
+
     public static void main(String[] args)  {
-        if (args.length != 1){
-            throw new RuntimeException("Input file not given");
-        }
+        // if (args.length != 1){
+        //     throw new RuntimeException("Input file not given");
+        // }
         try {
             // the file to be opened for reading
             FileInputStream fis = new FileInputStream(args[0]);
@@ -40,7 +41,7 @@ public class Main {
 	}
 
     void run(String trainA, String trainB) {
-        trainService.run(new ArrayList<>(Arrays.asList(trainA.split(" "))), 
+        journeyService.run(new ArrayList<>(Arrays.asList(trainA.split(" "))), 
         new ArrayList<>(Arrays.asList(trainB.split(" "))), 
         combinedSourceStation, combinedDestinationStation);
     }
