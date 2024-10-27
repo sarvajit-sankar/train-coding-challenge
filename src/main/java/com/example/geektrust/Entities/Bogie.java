@@ -2,17 +2,20 @@ package com.example.geektrust.Entities;
 
 // import com.example.geektrust.Configs.TrainConfiguration;
 
-public abstract class Bogie {
+public class Bogie {
     // station code is bogieName
-    protected String name;
-
-    public Bogie(String name) {
+    private String name;
+    private BogieType bogieType;
+    public Bogie(String name, BogieType bogieType) {
         this.name = name;
+        this.bogieType = bogieType;
     }
 
     public String getName() {
         return name;
     }
 
-    public abstract boolean isEngine();
+    public boolean isEngine() {
+        return bogieType.equals(BogieType.ENGINE);
+    }
 }

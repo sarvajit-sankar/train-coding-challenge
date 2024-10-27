@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.example.geektrust.Configs.TrainConfiguration;
 import com.example.geektrust.Entities.Bogie;
 import com.example.geektrust.Entities.BogieComparator;
-import com.example.geektrust.Entities.BogieFactory;
+import com.example.geektrust.Entities.BogieType;
 import com.example.geektrust.Entities.Train;
 
 public class TrainService {
@@ -24,8 +25,12 @@ public class TrainService {
 
     private void createBogies(Train T, List<String> train) {
         for (int i = 0; i < train.size(); i++) {
+            BogieType bogieType = BogieType.PASSENGER_CLASS;
             String bogieName = train.get(i);
-            Bogie bogie = BogieFactory.getBogie(bogieName);
+            if (!TrainConfiguration.getStationName(bogieName).isPresent()) {
+                bogieType = BogieType.ENGINE;
+            }
+            Bogie bogie = new Bogie(bogieName, bogieType);
             T.addBogie(bogie);
         }
     }
