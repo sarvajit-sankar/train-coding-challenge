@@ -18,5 +18,4 @@ public class BogieComparator implements Comparator<Bogie> {
         int distanceA = TrainConfiguration.getStationDistanceFromGivenSource(a.getName(), source);
         return distanceB - distanceA;
     }
-    
 }

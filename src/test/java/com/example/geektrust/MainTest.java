@@ -16,7 +16,7 @@ public class MainTest {
 
     @BeforeEach
     void setup(){
-        main = new Main("HYB", "BPL");
+        main = new Main();
         outputStream = new ByteArrayOutputStream();
         originalOut = System.out;
         System.setOut(new PrintStream(outputStream));

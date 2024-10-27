@@ -1,60 +1,74 @@
 package com.example.geektrust.Services;
 
-import java.util.Iterator;
-import java.util.List;
-
+import com.example.geektrust.Constants.Constants;
 import com.example.geektrust.Entities.Bogie;
 import com.example.geektrust.Entities.Train;
 
 public class JourneyService {
+    private final Train trainA;
+    private final Train trainB;
+    private final String mergePointStationCode;
+    private final String splitPointStationCode;
+    private TrainReporter trainReporter = new TrainReporter();
 
-    private TrainService trainService;
-
-    public JourneyService(TrainService trainService) {
-        this.trainService = trainService;
+    public JourneyService(Train trainA, Train trainB, String mergePoint, String splitPoint) {
+        this.trainA = trainA;
+        this.trainB = trainB;
+        this.mergePointStationCode = mergePoint;
+        this.splitPointStationCode = splitPoint;
     }
 
-    public void run(List<String> trainA, List<String> trainB, String combinedSourceStation, 
-    String combinedDestinationStation) {
-        Train A = trainService.createTrain(trainA, 2);
-        Train B = trainService.createTrain(trainB, 2);
-        travel(A, combinedSourceStation);
-        trainService.printTrain(A, "ARRIVAL");
-        travel(B, combinedSourceStation);
-        trainService.printTrain(B, "ARRIVAL");
+    public void run() {
+        trainA.travelTo(mergePointStationCode);
+        trainReporter.reportTrainStatus(trainA, "ARRIVAL");
+        trainB.travelTo(mergePointStationCode);
+        trainReporter.reportTrainStatus(trainB, "ARRIVAL");
         // merge at combinedSourceStation
-
-        Train AB = trainService.merge(A, B, combinedSourceStation);
-        if (AB.getBogies().size() < AB.getMinValidBogieCount()) {
+        Train trainAB = mergeTrains();
+        if (trainAB.getTotalBogiesCount() < trainAB.getMinValidBogieCount()) {
             System.out.println("JOURNEY_ENDED");
         }
         else {
-            trainService.printTrain(AB, "DEPARTURE");
-            // // travel from combinedSourceStation till combinedDestinationStation
-            // travel(AB, combinedDestinationStation);
-            // trainService.printTrain(AB, "ARRIVAL");
-            // // split at combinedDestinationStation
-            // trainService.split(A, B, AB, combinedDestinationStation);
-            // trainService.printTrain(A, "DEPARTURE");
-            // trainService.printTrain(B, "DEPARTURE");
+            trainReporter.reportTrainStatus(trainAB, "DEPARTURE");
+            // travel from combinedSourceStation till combinedDestinationStation
+            trainAB.travelTo(splitPointStationCode);
+            // trainReporter.reportTrainStatus(trainAB, "ARRIVAL");
+            // split at combinedDestinationStation
+            splitTrain(trainAB);
+            // trainReporter.reportTrainStatus(trainA, "DEPARTURE");
+            // trainReporter.reportTrainStatus(trainB, "DEPARTURE");
         }
     }
 
-    public void travel(Train train, String destination) {
-        int destinationDistance = train.getBogieDistanceFromSource(destination).get();
-        List<Bogie> bogies = train.getBogies();
-        Iterator<Bogie> iterator = bogies.iterator();
-        while (iterator.hasNext()) {
-            Bogie bogie = iterator.next();
-            // engines are to be ignored
-            if (bogie.isEngine()) {
-                continue;
+    private Train mergeTrains() {
+        Train AB = new Train("TRAIN_AB", Constants.MERGED_TRAIN_MIN_BOGIES);
+        AB.addBogies(trainA.getBogies());
+        AB.addBogies(trainB.getBogies());
+        // remove the arrived station(source) from the merged list, as travellers have gotten down here
+        AB.removeBogiesOfStation(mergePointStationCode);
+        // remove engine
+        AB.removeEngine();
+        AB.sortBogiesInDescendingDistancesFromStation(mergePointStationCode);
+        AB.addEngine();
+        // clear A and B train bogies
+        trainA.removeAllBogies();
+        trainB.removeAllBogies();
+        return AB;
+    }
+
+    private void splitTrain(Train AB) {
+        AB.removeEngine();
+        trainA.addEngine();
+        trainB.addEngine();
+        // remove the arrived station(source) from the merged list, as travellers have gotten down here
+        AB.removeBogiesOfStation(splitPointStationCode);
+        for (int i = 0; i < AB.getTotalBogiesCount(); i++) {
+            Bogie bogie = AB.getBogie(i);
+            if (trainA.getBogieDistanceFromSource(bogie.getName()).isPresent()) {
+                trainA.addBogie(bogie);
             }
-            // train may have bogies which aren't part of its route, which will get merged at destination
-            if (train.getBogieDistanceFromSource(bogie.getName()).isPresent()) {
-                if (train.getBogieDistanceFromSource(bogie.getName()).get() < destinationDistance) {
-                    iterator.remove();
-                }   
+            else {
+                trainB.addBogie(bogie);
             }
         }
     }
