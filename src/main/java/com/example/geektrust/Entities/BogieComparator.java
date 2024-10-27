@@ -2,7 +2,7 @@ package com.example.geektrust.Entities;
 
 import java.util.Comparator;
 
-import com.example.geektrust.Configs.TrainConfiguration;
+import com.example.geektrust.Configs.Route;
 
 public class BogieComparator implements Comparator<Bogie> {
     private String source;
@@ -14,8 +14,8 @@ public class BogieComparator implements Comparator<Bogie> {
     @Override
     public int compare(Bogie a, Bogie b) {
         // TODO Auto-generated method stub
-        int distanceB = TrainConfiguration.getStationDistanceFromGivenSource(b.getName(), source);
-        int distanceA = TrainConfiguration.getStationDistanceFromGivenSource(a.getName(), source);
+        int distanceB = Route.getInstance().getStationDistanceFromGivenSource(b.getName(), source);
+        int distanceA = Route.getInstance().getStationDistanceFromGivenSource(a.getName(), source);
         return distanceB - distanceA;
     }
 }

@@ -1,6 +1,6 @@
 package com.example.geektrust.Entities;
 
-import com.example.geektrust.Configs.TrainConfiguration;
+import com.example.geektrust.Configs.Route;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -13,13 +13,13 @@ public class Train {
     // engine(s) + 1
     private final int minValidBogieCount;
     private List<Bogie> bogies;
-    private HashMap<String, Integer> bogieDistanceFromSource;
+    private HashMap<String, Integer> route;
 
     public Train(String name, int minBogieCount) {
         this.name = name;
         this.bogies = new ArrayList<>();
         this.minValidBogieCount = minBogieCount;
-        bogieDistanceFromSource = TrainConfiguration.getStationDistances(name);
+        route = Route.getInstance().getStationDistances(name);
     }
 
     public void addBogie(Bogie bogie) {
@@ -54,7 +54,7 @@ public class Train {
     }
 
     public Optional<Integer> getBogieDistanceFromSource(String stationCode) {
-        return Optional.ofNullable(bogieDistanceFromSource.get(stationCode));
+        return Optional.ofNullable(route.get(stationCode));
     }
 
     private boolean shouldDetachBogie(Bogie bogie, int destinationDistance) {
