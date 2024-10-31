@@ -9,7 +9,7 @@ public class JourneyService {
     private final Train trainB;
     private final String mergePoint;
     private final String splitPoint;
-    private TrainReporter trainReporter = new TrainReporter();
+    private TrainService trainService = new TrainService();
 
     public JourneyService(Train trainA, Train trainB, String mergePoint, String splitPoint) {
         this.trainA = trainA;
@@ -22,18 +22,18 @@ public class JourneyService {
         arriveAtMergePoint();
         Train mergedTrain = performTrainMerge();
         if (mergedTrain.getTotalBogiesCount() < mergedTrain.getMinValidBogieCount()) {
-            trainReporter.reportJourneyEnd();
+            trainService.reportJourneyEnd();
             return;
         }
-        trainReporter.reportTrainStatus(mergedTrain, Constants.DEPARTURE);
+        trainService.reportTrainStatus(mergedTrain, Constants.DEPARTURE);
         completeMergedJourney(mergedTrain);
     }
 
     private void arriveAtMergePoint() {
         trainA.travelTo(mergePoint);
-        trainReporter.reportTrainStatus(trainA, Constants.ARRIVAL);
+        trainService.reportTrainStatus(trainA, Constants.ARRIVAL);
         trainB.travelTo(mergePoint);
-        trainReporter.reportTrainStatus(trainB, Constants.ARRIVAL);
+        trainService.reportTrainStatus(trainB, Constants.ARRIVAL);
     }
 
     private Train performTrainMerge() {
@@ -52,10 +52,10 @@ public class JourneyService {
 
     private void prepareMergedTrain(Train mergedTrain) {
         // remove the arrived station(source) from the merged list, as travellers have gotten down here
-        mergedTrain.removeBogiesOfStation(mergePoint);
+        trainService.removeBogiesOfStation(mergedTrain, mergePoint);
         // remove engine
         mergedTrain.removeEngine();
-        mergedTrain.sortBogiesInDescendingDistancesFromStation(mergePoint);
+        trainService.sortBogiesInDescendingDistancesFromStation(mergedTrain, mergePoint);
         mergedTrain.addEngine();
     }
 
@@ -74,7 +74,7 @@ public class JourneyService {
 
     private void splitBogiesOfMergedTrain(Train mergedTrain) {
         // remove the arrived station(source) from the merged list, as travellers have gotten down here
-        mergedTrain.removeBogiesOfStation(splitPoint);
+        trainService.removeBogiesOfStation(mergedTrain, splitPoint);
         for (int i = 0; i < mergedTrain.getTotalBogiesCount(); i++) {
             Bogie bogie = mergedTrain.getBogie(i);
             if (trainA.getBogieDistanceFromSource(bogie.getName()).isPresent()) {

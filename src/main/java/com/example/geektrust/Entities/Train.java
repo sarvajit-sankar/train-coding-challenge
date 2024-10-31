@@ -1,14 +1,14 @@
 package com.example.geektrust.Entities;
 
 import com.example.geektrust.Configs.Route;
+import com.example.geektrust.Constants.Constants;
+
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
 public class Train {
-    private static final String engineName = "ENGINE";
     private String name;
     // engine(s) + 1
     private final int minValidBogieCount;
@@ -30,23 +30,20 @@ public class Train {
         this.bogies.addAll(bogies);
     }
 
-    public List<Bogie> getBogies() {
-        return bogies;
+    public int getMinValidBogieCount() {
+        return minValidBogieCount;
     }
 
     public Bogie getBogie(int bogieCount) {
         return bogies.get(bogieCount);
     }
-
-    public String getName() {
-        return name;
+    
+    public List<Bogie> getBogies() {
+        return bogies;
     }
 
     public int getTotalBogiesCount() {
         return bogies.size();
-    }
-    public int getMinValidBogieCount() {
-        return minValidBogieCount;
     }
 
     public void removeAllBogies() {
@@ -67,23 +64,15 @@ public class Train {
         bogies.removeIf(bogie -> !bogie.isEngine() && shouldDetachBogie(bogie, destinationDistance));
     }
 
-    public void removeBogiesOfStation(String station) {
-        bogies.removeIf(e -> e.getName().equals(station));
-    }
-
-    public void sortBogiesInDescendingDistancesFromStation(String station) {
-        Collections.sort(bogies, new BogieComparator(station));
-    }
-
     public void addEngine() {
         for (int i = 1; i < minValidBogieCount; i++) {
-            Bogie bogie = new Bogie(engineName, BogieType.ENGINE);
+            Bogie bogie = new Bogie(Constants.engineName, BogieType.ENGINE);
             bogies.add(0, bogie);;
         }    
     }
 
     public void removeEngine() {
-        bogies.removeIf(e -> e.getName().equals(engineName));  
+        bogies.removeIf(e -> e.getName().equals(Constants.engineName));  
     }
 
     @Override
